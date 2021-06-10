@@ -1,0 +1,11 @@
+        .addField("👥 Friendly Roleplay Commands (" + bot.commands.filter(e => e.help.category === "rpf").size + ") :",
+        bot.commands.filter(e => e.help.category === "rpf").map(e => "`" + e.help.name + "`").join(", "),false)
+
+        .addField("👥 Nutral Roleplay Commands (" + bot.commands.filter(e => e.help.category === "rpn").size + ") :",
+        bot.commands.filter(e => e.help.category === "rpn").map(e => "`" + e.help.name + "`").join(", "),false)
+
+        .addField("👥 Hostile Roleplay Commands (" + bot.commands.filter(e => e.help.category === "rph").size + ") :",
+        bot.commands.filter(e => e.help.category === "rph").map(e => "`" + e.help.name + "`").join(", "),false)
+
+        .addField("🎵 Music (" + bot.commands.filter(e => e.help.category === "music").size + ") :",
+        bot.commands.filter(e => e.help.category === "music").map(e => "`" + e.help.name + "`").join(", "),false)

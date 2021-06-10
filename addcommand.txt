@@ -1,0 +1,4 @@
+,`get_slaped` int(200) NOT NULL DEFAULT '0',`slaped` int(200) NOT NULL DEFAULT '0'
+
+    "update_get_slaped":"UPDATE profil SET get_slaped=? WHERE user_id=?",
+    "update_slaped":"UPDATE profil SET slaped=? WHERE user_id=?",
