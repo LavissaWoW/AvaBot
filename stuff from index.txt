@@ -1,0 +1,4 @@
+        //welcome and leave message
+        
+        .replace(/{member.id}/g,member.id)
+        .replace(/{member.tag}/g,member.user.tag)
