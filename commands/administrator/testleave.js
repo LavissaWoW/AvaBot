@@ -1,4 +1,5 @@
 module.exports.run = async(bot, message, args) => {
+    let mention = message.mentions.users.first()
     bot.con.query(bot.queries.get_guild_config,[message.guild.id],function(err,guild_config){
         if(!guild_config || guild_config.length === 0) return
         guild_config = guild_config[0]
@@ -8,7 +9,11 @@ module.exports.run = async(bot, message, args) => {
             color:bot.config.colors.main,
             description:"Simulation done !"
         }})
-        bot.emit("guildMemberRemove",message.member)
+        let gMember
+        if(mention) {
+            gMember = message.guild.member(mention.id)
+        }
+        bot.emit("guildMemberRemove", gMember ? gMember : message.member)
     })
 }
 

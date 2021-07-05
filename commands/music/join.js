@@ -4,8 +4,7 @@ const date = require("date-and-time")
 
 module.exports.run = async(bot, message, args) => {
     let channel = message.member.voice.channel
-    let voice = bot.channels.cache.get(channel)
-    let connection = await voice.join()
+    let connection = await channel.join()
     if(!connection) return
     if(!channel) return bot.erreur("You must be in a vocal channel !",message.channel.id)
 }
@@ -17,7 +16,7 @@ module.exports.help = {
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,
-    description:"Play a music",
+    description:"Play a song",
     permissions:{
         bot:"",
         user:"",
