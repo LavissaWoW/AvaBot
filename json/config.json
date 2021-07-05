@@ -1,5 +1,5 @@
 {
-    "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.65thCKY-Oy33n9po94gk3cRoI5g",
+    "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.Fx9EzcWZd2pqzdxI03FhDgW12Uk",
     "prefix":"-",
     "staff":[
         "299560596976697344",
@@ -9,12 +9,15 @@
         "347114842164953091",
         "589639321158680576",
         "596378798912438282",
-        "787111963406368780"
+        "787111963406368780",
+        "136606882088353792"
     ],
     "gifadd":[
         "406841142735536139",
         "315927854523219968"
     ],
+    "max_autoresponses_free": 20,
+    "max_autoresponses_premium": 50,
     "colors":{
         "main":"fdb4ef",
         "red":"0xfe2e2e",

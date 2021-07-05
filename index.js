@@ -8,8 +8,11 @@ mysql = require("mysql"),
 ytdl = require("ytdl-core")
 
 let config = JSON.parse(fs.readFileSync("./json/config.json","utf8")),
+locale = JSON.parse(fs.readFileSync("./json/message.json","utf8")),
 queries = JSON.parse(fs.readFileSync("./json/queries.json","utf8")),
 acts = JSON.parse(fs.readFileSync("./json/actions.json","utf8"))
+
+let ph = require("./placeholders.js")
 
 let streamOptions = {seek :0, volume : 1}
 
@@ -19,6 +22,8 @@ bot.queries = queries
 bot.acts = acts
 bot.cooldown = []
 bot.prefix = config.prefix
+bot.locale = locale
+bot.placeholders = ph
 
 bot.erreur = erreur
 bot.random = random
@@ -41,7 +46,8 @@ bot.con = mysql.createConnection({
 	port     : 3306,
     user     : 'u45_rDhpr9MN7F',
     password : '.8SNScNdNL!kuvP.yZDDa++5',
-    database : 's45_ava'
+    database : 's45_ava',
+    charset  : 'utf8mb4'
 });
 
 bot.con.connect(function(err) {
@@ -71,7 +77,6 @@ fs.readdir("./commands/", (err, folders) => {
         })
     })
 });
-
 bot.login(bot.config.token)
 
 let count = 0
@@ -92,11 +97,14 @@ bot.on('ready', async function(){
 bot.on("message", async message => {
     if(message.author.bot || !message.guild) return
 
-
     bot.con.query(bot.queries.get_guild_config,[message.guild.id],function(err,guild_config){
         if(!guild_config || guild_config.length === 0) return bot.con.query(bot.queries.create_guild_config,[message.guild.id,"","","","","","","","","","","",bot.config.default_messages.level_up,bot.config.default_messages.reward,""])
         guild_config = guild_config[0]
-        bot.prefix = [bot.config.prefix, guild_config.prefix]
+        bot.prefix = [bot.config.prefix, guild_config.prefix, `<@${bot.user.id}>`]
+        if (message.mentions.has(bot.user)) {
+            console.log(bot.prefix)
+            message.channel.send(bot.prefix)
+        }
         bot.con.query(bot.queries.get_profil,[message.author.id],function(err,exist){
             if(!exist || exist.length === 0) bot.con.query(bot.queries.create_profil,[message.author.id])
             bot.con.query(bot.queries.get_global_level,[message.author.id],function(err,profil_global){
@@ -110,12 +118,12 @@ bot.on("message", async message => {
                     //###################GLOBAL XP####################\\
                     //################################################\\
                     if(message.content.length >= 10){
-                        let xp_win = bot.random(0,8)
+                        let xp_win = 105
                         profil_global.xp += xp_win
 						bot.con.query(bot.queries.update_global_level,[profil_global.level,profil_global.xp,message.author.id])
                         if(profil_global.xp >= profil_global.level * 150){
+                            profil_global.xp = profil_global.xp % (profil_global.level * 150)
                             profil_global.level++
-                            profil_global.xp = 0
 
                             bot.con.query(bot.queries.update_global_level,[profil_global.level,profil_global.xp,message.author.id])
                             if(["global","all"].includes(guild_config.level_notification_type)){
@@ -131,19 +139,7 @@ bot.on("message", async message => {
                                                     icon_url:bot.user.displayAvatarURL()
                                                 },
                                                 description:"You now have a global level of `" + profil_global.level + "` !"
-                                            }}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                        }
-
-                                        if(guild_config.level_location.match(/(all|\d{18,20})/g) !== null){
-                                            let channel_global = bot.channels.cache.get(guild_config.level_location) || message.channel
-                                            if(channel_global) channel_global.send({embed:{
-                                                color:bot.config.colors.main,
-                                                author:{
-                                                    name:"Congratulations !",
-                                                    icon_url:bot.user.displayAvatarURL()
-                                                },
-                                                description:"You now have a global level of `" + profil_global.level + "` !"
-                                            }}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
+                                            }})
                                         }
                                     }
                                 }
@@ -160,8 +156,8 @@ bot.on("message", async message => {
                         profil_guild.xp += xp_win
 						bot.con.query(bot.queries.update_level,[profil_guild.level,profil_guild.xp,message.author.id,message.guild.id])
                         if(profil_guild.xp >= profil_guild.level * 150){
+                            profil_guild.xp = profil_guild.xp % (profil_guild.level * 150)
                             profil_guild.level++
-                            profil_guild.xp = 0
 
                             bot.con.query(bot.queries.update_level,[profil_guild.level,profil_guild.xp,message.author.id,message.guild.id])
                             bot.con.query(bot.queries.get_level_reward,[profil_guild.level,message.guild.id],async function(err,roles){
@@ -196,28 +192,9 @@ bot.on("message", async message => {
                                                 .replace(/{avatar}/g,message.author.displayAvatarURL({format:"png"}))
                                                 guild_config.reward_message = guild_config.reward_message.toString("utf8")
                                                 .replace(/{reward}/g,rewards.length == 0 ? "" : rewards.map(e => "<@&" + e + ">").join(", "))
-                                                if(guild_config.level_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.level_message)}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                                else to_dm_guild.send(guild_config.level_message + (guild_config.reward_message.startsWith("{") ? "" : guild_config.reward_message)).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                                if(guild_config.reward_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.reward_message)}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                            }
-                                        }
-        
-                                        if(guild_config.level_location.match(/(all|\d{18,20})/g) !== null){
-                                            let channel_global = bot.channels.cache.get(guild_config.level_location) || message.channel
-                                            if(channel_global){
-                                                guild_config.level_message = guild_config.level_message.toString("utf8")
-                                                .replace(/{level}/g,profil_guild.level)
-                                                .replace(/{xp}/g,profil_guild.xp)
-                                                .replace(/{member}/g,"<@" + message.author.id + ">")
-                                                .replace(/{member.name/g,message.author.username)
-                                                .replace(/{neededxp}/g,(profil_guild.level * 150 - profil_guild.xp))
-                                                .replace(/{servericon}/g,message.guild.iconURL({format:"png"}))
-                                                .replace(/{avatar}/g,message.author.displayAvatarURL({format:"png"}))
-                                                guild_config.reward_message = guild_config.reward_message.toString("utf8")
-                                                .replace(/{reward}/g,rewards.length == 0 ? "" : rewards.map(e => "<@&" + e + ">").join(", "))
-                                                if(guild_config.level_message.startsWith("{")) channel_global.send({embed:JSON.parse(guild_config.level_message)}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                                else channel_global.send(guild_config.level_message + (guild_config.reward_message.startsWith("{") ? "" : guild_config.reward_message)).then(msg => msg.delete({timeout:guild_config.level_timeout}))
-                                                if(guild_config.reward_message.startsWith("{")) channel_global.send({embed:JSON.parse(guild_config.reward_message)}).then(msg => msg.delete({timeout:guild_config.level_timeout}))
+                                                if(guild_config.level_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.level_message)})
+                                                else to_dm_guild.send(guild_config.level_message + (guild_config.reward_message.startsWith("{") ? "" : guild_config.reward_message))
+                                                if(guild_config.reward_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.reward_message)})
                                             }
                                         }
                                     }
@@ -227,12 +204,31 @@ bot.on("message", async message => {
 
                     }
 
+                    bot.con.query(bot.queries.get_guild_autoresponses, [message.guild.id], function(err, autoresponses) {
+                        lookup = []
+                        for (const key in autoresponses) {
+                            const element = autoresponses[key];
+                            lookup.push(element.user_message)
+                        }
+                        if(lookup.includes(message.content)) {
+                            bot.con.query(bot.queries.get_autoresponse, [message.guild.id, message.content], async function(err, autoresponse) {
+                                autoresponse = autoresponse[0]
+                                let responses = autoresponse.responses ? autoresponse.responses.split("|") : ""
+                                let reactions = autoresponse.reactions ? autoresponse.reactions.split("|") : ""
+                                console.log(responses, reactions)
+                                if (responses.length > 0) {
+                                    message.channel.send(await bot.placeholders.replace(bot, message, responses[bot.random(0,responses.length - 1)]))
+                                }
+                                if (reactions.length > 0) message.react(reactions[bot.random(0, reactions.length - 1)].trim())
+                            })
+                        }
+                    })
 
                     let prefix_used = bot.prefix.filter(e => message.content.toLowerCase().startsWith(e))
                     if(prefix_used.length === 0) return
                     prefix_used = prefix_used[0]
-                    let args = message.content.slice(prefix_used.length).split(" ").slice(1).join(" ")
-                    let cmd = message.content.slice(prefix_used.length).split(" ")[0]                    
+                    let args = message.content.slice(prefix_used.length).trim().split(" ").slice(1).join(" ")
+                    let cmd = message.content.slice(prefix_used.length).trim().split(" ")[0]                    
                     
                     let commandFile = bot.commands.find(c => c.help.name.toLowerCase() == cmd.toLowerCase()) || bot.commands.find(c=> c.help.alias ? c.help.alias.includes(cmd.toLowerCase()) : false)      
                     if(!commandFile || !commandFile.help.status) return
@@ -423,7 +419,8 @@ bot.on("guildMemberAdd", member => {
         if(!guild || guild.length === 0) return
         guild = guild[0]
         let welcome_channel = bot.channels.cache.get(guild.welcome_channel)
-        guild.welcome_message = guild.welcome_message.toString("utf8").replace(/{member}/g,"<@" + member.id + ">")
+        console.log(guild.welcome_message.toString("utf8"))
+        guild.welcome_message = guild.welcome_message.toString("utf8").replace(/{member}/g,`<@${member.id}>`)
         .replace(/{member.name}/g,member.user.username)
         .replace(/{member.id}/g,member.id)
         .replace(/{member.tag}/g,member.user.tag)
@@ -432,6 +429,7 @@ bot.on("guildMemberAdd", member => {
         .replace(/{servericon}/g,member.guild.iconURL())
         .replace(/{welcomeimage}/g,guild.welcome_image)
         .replace(/{leaveimage}/g,guild.leave_image)
+        console.log(guild.welcome_message)
         if(welcome_channel){
             if(guild.welcome_message.startsWith("{")) welcome_channel.send({embed:JSON.parse(guild.welcome_message)})
             else welcome_channel.send(guild.welcome_message)
@@ -479,7 +477,8 @@ bot.on("guildMemberRemove", member => {
         if(!guild || guild.length === 0) return
         guild = guild[0]
         let leave_channel = bot.channels.cache.get(guild.leave_channel)
-        if(leave_channel) leave_channel.send(guild.leave_message.toString("utf8").replace(/{member}/g,"<@" + member.id + ">")
+        if(leave_channel) {
+            let leaveMessage = guild.leave_message.toString("utf8").replace(/{member}/g,"<@" + member.id + ">")
             .replace(/{member.name}/g,member.user.username)
             .replace(/{member.id}/g,member.id)
             .replace(/{member.tag}/g,member.user.tag)
@@ -487,8 +486,16 @@ bot.on("guildMemberRemove", member => {
             .replace(/{avatar}/g,member.user.displayAvatarURL({format:"png"}))
             .replace(/{servericon}/g,member.guild.iconURL({format:"png"}))
             .replace(/{welcomeimage}/g,guild.welcome_image)
-            .replace(/{leaveimage}/g,guild.leave_image))
+            .replace(/{leaveimage}/g,guild.leave_image)
+
+            if (leaveMessage.startsWith("{")) {
+                leave_channel.send({embed:JSON.parse(leaveMessage)})
+            } else {
+                leave_channel.send(leaveMessage.toString("utf8"))
+            }
+        }
         if(guild.log_channel === "") return 
+        let createDate = new Date(member.user.createdAt)
         let embed = {embed:{
             color:bot.config.colors.red,
             author:{
@@ -507,19 +514,24 @@ bot.on("guildMemberRemove", member => {
                     inline:true
                 },
                 {
-                    name:"Membercount",
+                    name:"New member count",
                     value:"`" + member.guild.memberCount + "`",
                     inline:true
                 },
                 {
                     name:"Date",
-                    value:"`" + date.format(member.user.createdAt,"DD/MM/YYYY - HH:mm") + "`",
+                    value:"" + "DD/MM/YYYY - HH:mm".replace(/DD/g, `0${createDate.getDate()}`.slice(-2))
+                    .replace(/MM/g, `0${createDate.getMonth() + 1}`.slice(-2))
+                    .replace(/YYYY/g, createDate.getFullYear())
+                    .replace(/HH/g, `0${createDate.getHours()}`.slice(-2))
+                    .replace(/mm/g, `0${createDate.getMinutes()}`.slice(-2)) + "",
                     inline:true
                 }
             ],
             timestamp:new Date()
         }}
-
+        console.log(createDate, member.user.createdAt)
+        console.log(createDate.getDate(), createDate.getMonth(), createDate.getFullYear(), createDate.getHours(), createDate.getMinutes())
         bot.log(embed,guild.log_channel)
     })
 })
@@ -913,12 +925,12 @@ function random(min, max) {
     return Math.round(Math.random() * (max - min) + min)
 }
 
-function convert(nombre){
-    return new Intl.NumberFormat().format(nombre)
+function convert(number){
+    return new Intl.NumberFormat().format(number)
 }
 
-function remove_cooldown(id,commande){
-    bot.cooldown.splice(bot.cooldown.findIndex(e => e.user_id === id && e.command === commande.toLowerCase()))
+function remove_cooldown(id,command){
+    bot.cooldown.splice(bot.cooldown.findIndex(e => e.user_id === id && e.command === command.toLowerCase()))
 }
 
 async function queued(songs,type,channel,erreur){
@@ -938,6 +950,7 @@ async function queued(songs,type,channel,erreur){
     }
     setTimeout(() => {
         let chan = bot.channels.cache.get(channel)
+        console.log(channel, chan)
         let queue = bot.queue.find(e => e.guild_id === chan.guild.id)
         if(!queue) bot.queue.push({guild_id:chan.guild.id,songs:[array[0]]})
         else queue.songs.push(array[0])

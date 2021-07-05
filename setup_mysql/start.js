@@ -46,6 +46,8 @@ let query_reaction = "CREATE TABLE IF NOT EXISTS s45_ava.role_reaction (`guild_i
 
 let query_warn = "CREATE TABLE IF NOT EXISTS s45_ava.warns (`ID` varchar(20) NOT NULL,`guild_id` varchar(20) NOT NULL,`user_id` varchar(20) NOT NULL,`user_name` varchar(30) NOT NULL,`moderator_id` varchar(20) NOT NULL,`moderator_name` varchar(30) NOT NULL,`date` varchar(30) NOT NULL,`reason` varchar(100) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8;"
 
+let autoresponses = "CREATE TABLE IF NOT EXISTS s45_ava.autoresponses (`ID` int NOT NULL, `guild_id` varchar(20) NOT NULL, `user_message` TEXT NOT NULL, `responses` TEXT NULL, `reactions` TEXT NULL, PRIMARY KEY (`ID`)) ENGINE = InnoDB;"
+
 sql.query(query, function (err, results, fields) {
     if (err) console.log(err.message);
 
@@ -77,7 +79,9 @@ sql.query(query, function (err, results, fields) {
         if (err) console.log(err.message);
     });
 
-
+    sql.query(autoresponses, function (err, results, fields) {
+        if (err) console.log(err.message);
+    });
 
 
 });

@@ -13,7 +13,7 @@ module.exports.run = async(bot, message, args) => {
     }
 
     if(msg.startsWith("{")){
-        let valid = await JSON.parse(msg).catch(err => {})
+        let valid = await JSON.parse(msg)
         if(!valid) return bot.erreur("This embed is invalid !",message.channel.id)
     } else {
         if(msg.length > 800) return bot.erreur("The leave message cannot exceed 800 characters !",message.channel.id)

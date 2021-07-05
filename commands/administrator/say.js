@@ -6,10 +6,15 @@ module.exports.run = async(bot, message, args) => {
     .replace("{membercount}",message.guild.memberCount)
     .replace("{avatar}",bot.user.displayAvatarURL())
     .replace("{servericon}",(message.guild.iconURL() == null ? "" : message.guild.iconURL()))
+    msg = await bot.placeholders.replace(bot, message, msg)
     if(msg.startsWith("{")){
         try {
-            msg = JSON.parse(msg)
-            message.channel.send({embed:msg})
+            embedMsg = JSON.parse(msg)
+            if(embedMsg.plainText) {
+                var plainText = embedMsg.plainText
+            }
+            message.channel.send(plainText)
+            message.channel.send({embed:embedMsg})
         } catch {
             return bot.erreur("Invalid embed !",message.channel.id)
         }

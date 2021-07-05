@@ -1,7 +1,7 @@
 module.exports.run = async(bot, message, args) => {
     let id = args
     if(!id) return bot.erreur("You must enter a message ID !",message.channel.id)
-    bot.con.query(bot.queries.get_message,[id],function(err,msg){
+    bot.con.query(bot.queries.get_message,[message.guild.id,id],function(err,msg){
         if(!msg || msg.length === 0) return bot.erreur("This message does not have any reaction role configuration !",message.channel.id)
         msg = msg[0]
         let token = bot.get_id()

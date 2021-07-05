@@ -58,7 +58,7 @@
     "delete_role_reaction":"DELETE FROM role_reaction WHERE message_id=? AND role_id=?",
     "get_reaction":"SELECT * FROM role_reaction WHERE message_id=? AND reaction=?",
     "get_message_reaction":"SELECT * FROM role_reaction WHERE message_id=? AND channel_id=?",
-    "get_message":"SELECT * FROM role_reaction WHERE message_id=?",
+    "get_message":"SELECT * FROM role_reaction WHERE guild_id=? AND message_id=?",
     "update_unique":"UPDATE role_reaction SET uniq=? WHERE linked_key=?",
     "update_binding":"UPDATE role_reaction SET binding=? WHERE linked_key=?",
     "update_linked":"UPDATE role_reaction SET linked_key=? WHERE message_id=?",
@@ -76,6 +76,12 @@
     "warn":"INSERT INTO warns (ID,user_name,user_id,guild_id,moderator_name,moderator_id,date,reason) VALUES (?,?,?,?,?,?,?,?)",
     "get_warn":"SELECT * FROM warns WHERE user_id=? AND guild_id=?",
     "delete_warn":"DELETE FROM warns WHERE ID=?",
+
+    "create_autoresponse":"INSERT INTO autoresponses (guild_id,user_message,responses,reactions) VALUES (?,?,?,?)",
+    "get_guild_autoresponses":"SELECT autoresponses.user_message FROM autoresponses WHERE guild_id=?",
+    "get_autoresponse":"SELECT * FROM autoresponses WHERE guild_id=? AND user_message=?",
+    "update_autoresponse":"UPDATE autoresponses SET user_message=?, responses=?, reactions=? WHERE ID=?",
+    "delete_autoresponse":"DELETE FROM autoresponses WHERE ID=?",
 
     "update_blushed":"UPDATE profil SET blushed=? WHERE user_id=?",
     "update_get_blushed":"UPDATE profil SET get_blushed=? WHERE user_id=?",
