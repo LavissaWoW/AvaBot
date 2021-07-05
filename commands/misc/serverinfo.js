@@ -24,7 +24,7 @@ const regions = {
 	russia: 'Russia',
 	singapore: 'Singapore',
 	southafrica: 'South Africa',
-	sydeny: 'Sydeny',
+	sydeny: 'Sydney',
 	'us-central': 'US Central',
 	'us-east': 'US East',
 	'us-west': 'US West',
@@ -52,10 +52,15 @@ module.exports.run = async (bot, message, args) => {
     const joineddate = moment.utc(member.joinedAt).format("dddd, MMMM Do YYYY, HH:mm:ss");
     let status = member.presence.status;
 
+    let serverCreated = moment.duration(moment().diff(moment(message.guild.createdTimestamp)))
+    let createdString = (serverCreated.years() > 0 ? serverCreated.years() + " year" + (serverCreated.years() > 1 ? "s" : "") + " " : "") + 
+                    (serverCreated.months() > 0 ? serverCreated.months() + " month" + (serverCreated.months() > 1 ? "s" : "") + " " : "") +
+                    (serverCreated.days() > 0 ? serverCreated.days() + " day" + (serverCreated.days() > 1 ? "s" : "") : "") + " ago"
+
     const userEmbed = new Discord.MessageEmbed()
-    .setAuthor(message.guild.name, member.user.displayAvatarURL())
+    .setAuthor(message.guild.name, bot.user.displayAvatarURL())
     .setTimestamp()
-    .setFooter(`Server info requested by ${message.author.tag} | ${message.author.username} | ${message.author.id}`)
+    .setFooter(`Server info requested by ${message.author.tag} | ${message.author.username} | ${message.author.id}`, member.user.displayAvatarURL())
     .setColor(bot.config.colors.main)
     .setThumbnail(message.guild.iconURL({ dynamic: true }))
     .setDescription(`**Guild information for __${message.guild.name}__**`)
@@ -67,7 +72,7 @@ module.exports.run = async (bot, message, args) => {
         `**❯ 💜 Boost Tier:** ${message.guild.premiumTier ? `Tier ${message.guild.premiumTier}` : 'None'}`,
         `**❯ ⚙ Explicit Filter:** ${filterLevels[message.guild.explicitContentFilter]}`,
         `**❯ ⚙ Verification Level:** ${verificationLevels[message.guild.verificationLevel]}`,
-        `**❯ ⏲️ Time Created:** ${moment(message.guild.createdTimestamp).format('LT')} ${moment(message.guild.createdTimestamp).format('LL')} ${moment(message.guild.createdTimestamp).fromNow()}`,
+        `**❯ ⏲️ Time Created:** ${moment(message.guild.createdTimestamp).format("dddd, MMMM Do YYYY, HH:mm:ss")} ${moment(message.guild.createdTimestamp).format('LL')} ${createdString}`,
         '\u200b'
     ])
     .addField('🌐 Statistics', [
