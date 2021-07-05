@@ -29,7 +29,7 @@ module.exports.run = async(bot, message, args) => {
     
 
     
-    message.channel.send("Sended Your Suggestion to " + channel).catch(err => {})
+    message.channel.send("Sent Your Suggestion to " + channel).catch(err => {})
     
   }
 

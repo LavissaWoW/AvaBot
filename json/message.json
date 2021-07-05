@@ -1,3 +1,21 @@
 {
-    "ilymes": "testing!"
+    "ilymes": "testing!",
+    "invite": "Invite",
+
+    "autoresponse_limit_number": "Number of allowed autoresponses",
+    "autoresponse_limit_reached": "Autoresponse limit reached",
+    "autoresponse_register_new_error": "I'm sorry, but I wasn't able to register the new responses.",
+    "autoresponse_register_abort": "Autoresponse creation aborted.",
+    "autoresponse_registered": "Autoresponse registered",
+    "autoresponse_user_message": "User message",
+    "autoresponse_exists": "This autoresponse already exists",
+    "autoresponse_overwrite_warning": "This action will overwrite all saved responses and reactions to this message",
+    "unrecognised_command": "I'm sorry, I don't understand. Please check `{prefix} help {command}`",
+    "override_command": "Type `{command} override` to ignore errors",
+    "override_command_confirmation": "Retype `{command} override` to confirm your choice",
+    "responses": "Responses",
+    "reactions": "Reactions",
+    "reason": "Reason",
+    "warning": "Warning",
+    "none": "None"
 }
