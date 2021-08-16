@@ -25,7 +25,9 @@
     "update_level_blacklist":"UPDATE guilds_config SET level_blacklist_channels=? WHERE guild_id=?",
 
     "create_profil":"INSERT INTO profil (user_id) VALUES (?)",
+    "create_profile":"INSERT INTO profil (user_id) VALUES (?)",
     "get_profil":"SELECT * FROM profil WHERE user_id=?",
+    "get_profile":"SELECT * FROM profil WHERE user_id=?",
 
     "get_global_level":"SELECT * FROM global_level WHERE user_id=?",
     "create_global_level":"INSERT INTO global_level (user_id,user_name) VALUES (?,?)",
