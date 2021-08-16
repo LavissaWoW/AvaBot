@@ -84,13 +84,140 @@ bot.on('ready', async function(){
     console.log("\x1b[32m[START]\x1b[33m Ava is connected !\x1b[0m")
     console.log(`${bot.user.username} is on ${bot.guilds.cache.size} servers and monitoring ${bot.users.cache.size} users! ${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases`)
     setInterval(() => {
-        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "LISTENING"}), count++
+        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "COMPETING"}), count++
         else if(count === 1) bot.user.setActivity(`with ${bot.guilds.cache.size} servers and ${bot.users.cache.size} users!`, {type: "PLAYING"}), count++
         else if(count === 2) bot.user.setActivity(`${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases!`, {type: "LISTENING"}), count = 0
     },10000)
 
     setInterval(() => updateGiveaway(),30000)
     setInterval(() => updateModeration(), 60000);
+})
+
+async function query (query, bindings = []) {
+    if(!bot.con.state === "disconnected") {
+        throw new MySqlError("Not connected to a database");
+    }
+
+    return await new Promise((resolve, reject) => {
+        bot.con.query(query, bindings, (error, results) => (error ? reject(error) : resolve(results)));
+    })
+}
+
+bot.on("message", async message => {
+    try {
+        if(message.author.bot || !message.guild) return
+
+        // Fetching guild config
+        let guild_config = await query(bot.queries.get_guild_config, [message.guild.id]);
+        if(!guild_config || guild_config.length === 0) {
+            await query(bot.queries.create_guild_config,[message.guild.id,"","","","","","","","","","","",bot.config.default_messages.level_up,bot.config.default_messages.reward,""])
+            guild_config = await query(bot.queries.get_guild_config, [message.guild.id]);
+        }
+
+        // Checks if user has profile
+        let user_exists = await query(bot.queries.get_profile, [message.author.id]);
+        if(!user_exists || user_exists.length === 0) {
+            query(bot.queries.create_profile, [message.author.id]);        
+        }
+
+        // Fetching user levels
+        let user_global_level = await query(bot.queries.get_global_level,[message.author.id]);
+        if (!user_global_level || user_global_level.length == 0) {
+            await query(bot.queries.create_global_level, [message.author.id,message.author.username]);
+            user_global_level = await query(bot.queries.get_global_level,[message.author.id]);
+        }
+        let user_guild_level = await query(bot.queries.get_level, [message.author.id,message.guild.id]);
+        if (!user_guild_level || user_guild_level.length == 0) {
+            await query(bot.queries.create_guild_level,[message.author.id,message.guild.id]);
+            user_guild_level = await query(bot.queries.get_level, [message.author.id,message.guild.id]);
+        }
+
+        guild_config = guild_config[0];
+        user_global_level = user_global_level[0];
+        user_guild_level = user_guild_level[0];
+        message.channel.send(!guild_config.level_blacklist_channels.split(",").includes(message.channel.id))
+        // Running XP system if message is valid for XP gain
+        if(message.length > 10 && !guild_config.level_blacklist_channels.split(",").includes(message.channel.id)) {
+            let global_xp_gain = 10;
+            let guild_xp_gain = guild_config.level_xp_gain;
+
+            user_global_level.xp += global_xp_gain;
+            user_guild_level.xp += guild_xp_gain;
+
+            if(user_global_level.xp > user_global_level.level * 150) {
+                user_global_level.level++;
+                user_global_level.xp %= 150;
+            }
+            if(user_guild_level.xp > user_guild_level.level * 150) {
+                user_guild_level.level++;
+                user_guild_level.xp %= 150;
+            }
+            message.channel.send("Added XP to you :)");
+            query(bot.queries.update_global_level,[user_global_level.level, user_global_level.xp, message.author.id]);
+            query(bot.queries.update_guild_level,[user_guild_level.level, user_guild_level.xp, message.author.id]);
+
+            if(["global","all"].includes(guild_config.level_notification_type)){
+                if(guild_config.level_notification == "all" || guild_config.level_notification.includes("every")){
+                    let nbr = guild_config.level_notification == "all" ? 1 : guild_config.level_notification.split(" ")[1]
+                    if(Number.isInteger(Number(user_global_level.level) / nbr)){
+                        if(["all","dms"].includes(guild_config.level_location)){
+                            let to_dm_global = await message.author.createDM().catch(err => {})
+                            if(to_dm_global) to_dm_global.send({embed:{
+                                color:bot.config.colors.main,
+                                author:{
+                                    name:"Congratulations !",
+                                    icon_url:bot.user.displayAvatarURL()
+                                },
+                                description:"You now have a global level of `" + user_global_level.level + "` !"
+                            }})
+                        }
+                    }
+                }
+            }
+
+            let roles = await query(bot.queries.get_level_reward,[user_guild_level.level,message.guild.id]);
+            let rewards = roles.map(e => e.role_id)
+            if(rewards.length > 0) rewards.forEach(r => {
+                let role_guild = message.guild.roles.cache.get(r)
+                if(role_guild) message.member.roles.add(role_guild.id)
+                if(guild_config.level_type === "replace"){
+                    bot.con.query(bot.queries.get_fewer_reward,[profil_guild.level,message.guild.id],function(err,fewer_roles){
+                        if(fewer_roles && fewer_roles.length === 1){
+                            let role_remove = message.guild.roles.cache.get(fewer_roles[0].role_id)
+                            if(role_remove && message.member.roles.cache.has(role_remove.id)) message.member.roles.remove(role_remove.id)
+                        }
+                    })
+                }
+            })
+
+            if(["server","all"].includes(guild_config.level_notification_type)){
+                let nbr = ["all","reward"].includes(guild_config.level_notification) ? 1 : guild_config.level_notification.split(" ")[1]
+                let reward = guild_config.level_notification == "reward" ? rewards.length > 0 : true
+                if(Number.isInteger(Number(profil_guild.level) / nbr) && reward){
+                    if(["all","dms"].includes(guild_config.level_location)){
+                        let to_dm_guild = await message.author.createDM().catch(err => {})
+                        if(to_dm_guild){
+                            guild_config.level_message = guild_config.level_message.toString("utf8")
+                            .replace(/{level}/g,profil_guild.level)
+                            .replace(/{xp}/g,profil_guild.xp)
+                            .replace(/{member}/g,"<@" + message.author.id + ">")
+                            .replace(/{member.name}/g,message.author.username)
+                            .replace(/{neededxp}/g,(profil_guild.level * 150 - profil_guild.xp))
+                            .replace(/{servericon}/g,message.guild.iconURL({format:"png"}))
+                            .replace(/{avatar}/g,message.author.displayAvatarURL({format:"png"}))
+                            guild_config.reward_message = guild_config.reward_message.toString("utf8")
+                            .replace(/{reward}/g,rewards.length == 0 ? "" : rewards.map(e => "<@&" + e + ">").join(", "))
+                            if(guild_config.level_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.level_message)})
+                            else to_dm_guild.send(guild_config.level_message + (guild_config.reward_message.startsWith("{") ? "" : guild_config.reward_message))
+                            if(guild_config.reward_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guild_config.reward_message)})
+                        }
+                    }
+                }
+            }
+        }
+    } catch(error) {
+        console.log(error);
+    }
 })
 
 
@@ -121,11 +248,13 @@ bot.on("message", async message => {
                         let xp_win = 105
                         profil_global.xp += xp_win
 						bot.con.query(bot.queries.update_global_level,[profil_global.level,profil_global.xp,message.author.id])
+                        message.channel.send("Added XP to you :)");
                         if(profil_global.xp >= profil_global.level * 150){
                             profil_global.xp = profil_global.xp % (profil_global.level * 150)
                             profil_global.level++
 
                             bot.con.query(bot.queries.update_global_level,[profil_global.level,profil_global.xp,message.author.id])
+
                             if(["global","all"].includes(guild_config.level_notification_type)){
                                 if(guild_config.level_notification == "all" || guild_config.level_notification.includes("every")){
                                     let nbr = guild_config.level_notification == "all" ? 1 : guild_config.level_notification.split(" ")[1]
