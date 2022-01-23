@@ -11,7 +11,8 @@ ytdl = require("ytdl-core")
 let config = JSON.parse(fs.readFileSync("./json/config.json","utf8")),
 locale = JSON.parse(fs.readFileSync("./json/message.json","utf8")),
 queries = JSON.parse(fs.readFileSync("./json/queries.json","utf8")),
-acts = JSON.parse(fs.readFileSync("./json/actions.json","utf8"))
+acts = JSON.parse(fs.readFileSync("./json/actions.json","utf8")),
+env = JSON.parse(fs.readFileSync("json/env.json", "utf8"))
 
 let ph = require("./placeholders.js")
 
@@ -72,7 +73,7 @@ fs.readdir("./commands/", (err, folders) => {
         })
     })
 });
-bot.login(bot.config.token)
+bot.login(env.token)
 
 let count = 0
 bot.on('ready', async function(){
