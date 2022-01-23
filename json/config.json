@@ -1,5 +1,5 @@
 {
-    "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.Fx9EzcWZd2pqzdxI03FhDgW12Uk",
+    "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.lqbGe6EtRdBygUxcqS4fk33MhLc",
     "prefix":"-",
     "staff":[
         "299560596976697344",
@@ -14,7 +14,8 @@
     ],
     "gifadd":[
         "406841142735536139",
-        "315927854523219968"
+        "315927854523219968",
+        "136606882088353792"
     ],
     "max_autoresponses_free": 20,
     "max_autoresponses_premium": 50,
@@ -29,5 +30,7 @@
     "default_messages":{
         "level_up":"{member} is now level {level} !",
         "reward":"You won the role {reward} !"
-    }
+    },
+    "globalXPGain": 10,
+    "XPPerLevel": 140
 }

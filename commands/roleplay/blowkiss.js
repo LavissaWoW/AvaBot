@@ -1,5 +1,5 @@
 module.exports.help = {
-    name:"blowkiss",
+    name:"oldblowkiss",
     alias: ["blow-kiss", "blow_kiss", "bk", "blow kiss,"],
     cooldown:0,
     use_per_cooldown:1,
