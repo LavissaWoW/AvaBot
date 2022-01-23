@@ -1,13 +1,17 @@
 {
-  "name": "dreamie",
-  "version": "1.0.0",
-  "description": "",
+  "name": "ava",
+  "version": "0.8.0",
+  "description": "Ava Discord server bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "author": "Xen0o2",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LavissaWoW/AvaBot.git"
+  },
+  "author": "Amelia/Lavissa",
+  "license": "unlicensed",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "canvacord": "^5.2.0",
