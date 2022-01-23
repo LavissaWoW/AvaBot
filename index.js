@@ -1,4 +1,5 @@
 const { notDeepEqual } = require("assert");
+const levellingSystem = require("./levelling-system.js");
 
 const Discord = require("discord.js"),
 bot = new Discord.Client(/*{ws: { intents: Discord.Intents.ALL }}*/),
@@ -10,7 +11,10 @@ ytdl = require("ytdl-core")
 let config = JSON.parse(fs.readFileSync("./json/config.json","utf8")),
 locale = JSON.parse(fs.readFileSync("./json/message.json","utf8")),
 queries = JSON.parse(fs.readFileSync("./json/queries.json","utf8")),
-acts = JSON.parse(fs.readFileSync("./json/actions.json","utf8"))
+acts = JSON.parse(fs.readFileSync("./json/actions.json","utf8")),
+env = JSON.parse(fs.readFileSync("json/env.json", "utf8"))
+
+let ph = require("./placeholders.js")
 
 let ph = require("./placeholders.js")
 
@@ -40,15 +44,9 @@ bot.playing = {}
 bot.queue = []
 bot.reaction_menu = []
 
+let dbCon = JSON.parse(fs.readFileSync("json/database.json", "utf8"))
 
-bot.con = mysql.createConnection({
-    host     : '135.181.130.77',
-	port     : 3306,
-    user     : 'u45_rDhpr9MN7F',
-    password : '.8SNScNdNL!kuvP.yZDDa++5',
-    database : 's45_ava',
-    charset  : 'utf8mb4'
-});
+bot.con = mysql.createConnection(dbCon.ame);
 
 bot.con.connect(function(err) {
     if(err) return console.log(err);
@@ -77,14 +75,16 @@ fs.readdir("./commands/", (err, folders) => {
         })
     })
 });
-bot.login(bot.config.token)
+bot.login(env.token)
 
 let count = 0
 bot.on('ready', async function(){
+    let rpCommands = require("./commands/roleplay/rpSystem.js")
+    await rpCommands.initRpCommands(bot)
     console.log("\x1b[32m[START]\x1b[33m Ava is connected !\x1b[0m")
     console.log(`${bot.user.username} is on ${bot.guilds.cache.size} servers and monitoring ${bot.users.cache.size} users! ${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases`)
     setInterval(() => {
-        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "LISTENING"}), count++
+        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "COMPETING"}), count++
         else if(count === 1) bot.user.setActivity(`with ${bot.guilds.cache.size} servers and ${bot.users.cache.size} users!`, {type: "PLAYING"}), count++
         else if(count === 2) bot.user.setActivity(`${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases!`, {type: "LISTENING"}), count = 0
     },10000)
@@ -92,6 +92,141 @@ bot.on('ready', async function(){
     setInterval(() => updateGiveaway(),30000)
     setInterval(() => updateModeration(), 60000);
 })
+
+async function query (query, bindings = []) {
+    if(!bot.con.state === "disconnected") {
+        throw new MySqlError("Not connected to a database");
+    }
+
+    return await new Promise((resolve, reject) => {
+        bot.con.query(query, bindings, (error, results) => (error ? reject(error) : resolve(results)));
+    })
+}
+
+class Database {
+    constructor() {
+        this.db = null;
+    }
+
+    initialise() {
+        this.createConnection();
+        this.connect();
+    }
+
+    createConnection() {
+        this.db = mysql.createPool(dbCon.ame);
+    }
+
+    connect() {
+        try {
+            this.db.connect();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    getState() {
+        return this.db.state;
+    }
+
+    async query(sqlQuery, bindings = []) {
+        if (this.db.state === "disconnected") {
+            throw new MySqlError("Not connected to a database");
+        }
+
+        return await new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, bindings, (error, results) => (error ? reject(error) : resolve(results)));
+        })
+    }
+}
+
+bot.db = new Database();
+bot.db.initialise();
+
+/*bot.on("message", async message => {
+    try {
+        if(message.author.bot || !message.guild) return
+
+        // Fetching guild config
+        let guildConfig = await bot.db.query(bot.queries.get_guild_config, [message.guild.id]);
+        if(!guildConfig || guildConfig.length === 0) {
+            await bot.db.query(bot.queries.create_guild_config,[message.guild.id,bot.config.default_messages.level_up,bot.config.default_messages.reward])
+            guildConfig = await bot.db.query(bot.queries.get_guild_config, [message.guild.id]);
+        }
+
+        // Checks if user has profile
+        let user_exists = await bot.db.query(bot.queries.get_profile, [message.author.id]);
+        if(!user_exists || user_exists.length === 0) {
+            await bot.db.query(bot.queries.create_profile, [message.author.id]);        
+        }
+
+        // Fetching user levels
+        let user_global_level = await bot.db.query(bot.queries.get_global_level,[message.author.id]);
+        if (!user_global_level || user_global_level.length == 0) {
+            await bot.db.query(bot.queries.create_global_level, [message.author.id,message.author.username]);
+            user_global_level = await bot.db.query(bot.queries.get_global_level,[message.author.id]);
+        }
+        let user_guild_level = await bot.db.query(bot.queries.get_level, [message.author.id,message.guild.id]);
+        if (!user_guild_level || user_guild_level.length == 0) {
+            await bot.db.query(bot.queries.create_guild_level,[message.author.id,message.guild.id]);
+            user_guild_level = await bot.db.query(bot.queries.get_level, [message.author.id,message.guild.id]);
+        }
+
+        guildConfig = guildConfig[0];
+        user_global_level = user_global_level[0];
+        user_guild_level = user_guild_level[0];
+        // Running XP system if message is valid for XP gain
+        if(message.content.length > 10 && !guildConfig.level_blacklist_channels.split(",").includes(message.channel.id)) {
+            const levels = new levellingSystem.levels(bot, message);
+            levels.setUserLevelInfo(user_global_level, user_guild_level);
+            levels.setGuildConfig(guildConfig);
+            levels.applyGlobalXP();
+            levels.applyGuildXP();
+
+            let roles = await query(bot.queries.get_level_reward,[user_guild_level.level,message.guild.id]);
+            let rewards = roles.map(e => e.role_id)
+            if(rewards.length > 0) rewards.forEach(r => {
+                let role_guild = message.guild.roles.cache.get(r)
+                if(role_guild) message.member.roles.add(role_guild.id)
+                if(guildConfig.level_type === "replace"){
+                    bot.con.query(bot.queries.get_fewer_reward,[profil_guild.level,message.guild.id],function(err,fewer_roles){
+                        if(fewer_roles && fewer_roles.length === 1){
+                            let role_remove = message.guild.roles.cache.get(fewer_roles[0].role_id)
+                            if(role_remove && message.member.roles.cache.has(role_remove.id)) message.member.roles.remove(role_remove.id)
+                        }
+                    })
+                }
+            })
+
+            if(["server","all"].includes(guildConfig.level_notification_type)){
+                let nbr = ["all","reward"].includes(guildConfig.level_notification) ? 1 : guildConfig.level_notification.split(" ")[1]
+                let reward = guildConfig.level_notification == "reward" ? rewards.length > 0 : true
+                if(Number.isInteger(Number(profil_guild.level) / nbr) && reward){
+                    if(["all","dms"].includes(guildConfig.level_location)){
+                        let to_dm_guild = await message.author.createDM().catch(err => {})
+                        if(to_dm_guild){
+                            guildConfig.level_message = guildConfig.level_message.toString("utf8")
+                            .replace(/{level}/g,profil_guild.level)
+                            .replace(/{xp}/g,profil_guild.xp)
+                            .replace(/{member}/g,"<@" + message.author.id + ">")
+                            .replace(/{member.name}/g,message.author.username)
+                            .replace(/{neededxp}/g,(profil_guild.level * 150 - profil_guild.xp))
+                            .replace(/{servericon}/g,message.guild.iconURL({format:"png"}))
+                            .replace(/{avatar}/g,message.author.displayAvatarURL({format:"png"}))
+                            guildConfig.reward_message = guildConfig.reward_message.toString("utf8")
+                            .replace(/{reward}/g,rewards.length == 0 ? "" : rewards.map(e => "<@&" + e + ">").join(", "))
+                            if(guildConfig.level_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guildConfig.level_message)})
+                            else to_dm_guild.send(guildConfig.level_message + (guildConfig.reward_message.startsWith("{") ? "" : guildConfig.reward_message))
+                            if(guildConfig.reward_message.startsWith("{")) to_dm_guild.send({embed:JSON.parse(guildConfig.reward_message)})
+                        }
+                    }
+                }
+            }
+        }
+    } catch(error) {
+        console.log(error);
+    }
+})*/
 
 
 bot.on("message", async message => {
@@ -118,6 +253,7 @@ bot.on("message", async message => {
                         let xp_win = 5
                         profil_global.xp += xp_win
 						bot.con.query(bot.queries.update_global_level,[profil_global.level,profil_global.xp,message.author.id])
+
                         if(profil_global.xp >= profil_global.level * 150){
                             profil_global.xp = profil_global.xp % (profil_global.level * 150)
                             profil_global.level++
@@ -225,8 +361,8 @@ bot.on("message", async message => {
                     let prefix_used = bot.prefix.filter(e => message.content.toLowerCase().startsWith(e))
                     if(prefix_used.length === 0) return
                     prefix_used = prefix_used[0]
-                    let args = message.content.slice(prefix_used.length).split(" ").slice(1).join(" ")
-                    let cmd = message.content.slice(prefix_used.length).split(" ")[0]                    
+                    let args = message.content.slice(prefix_used.length).trim().split(" ").slice(1).join(" ")
+                    let cmd = message.content.slice(prefix_used.length).trim().split(" ")[0]                    
                     
                     let commandFile = bot.commands.find(c => c.help.name.toLowerCase() == cmd.toLowerCase()) || bot.commands.find(c=> c.help.alias ? c.help.alias.includes(cmd.toLowerCase()) : false)      
                     if(!commandFile || !commandFile.help.status) return
@@ -426,6 +562,7 @@ bot.on("guildMemberAdd", member => {
         .replace(/{servericon}/g,member.guild.iconURL())
         .replace(/{welcomeimage}/g,guild.welcome_image)
         .replace(/{leaveimage}/g,guild.leave_image)
+        console.log(guild.welcome_message)
         if(welcome_channel){
             if(guild.welcome_message.startsWith("{")) welcome_channel.send({embed:JSON.parse(guild.welcome_message)})
             else welcome_channel.send(guild.welcome_message)
@@ -944,6 +1081,7 @@ async function queued(songs,type,channel,erreur){
     }
     setTimeout(() => {
         let chan = bot.channels.cache.get(channel)
+        console.log(channel, chan)
         let queue = bot.queue.find(e => e.guild_id === chan.guild.id)
         if(!queue) bot.queue.push({guild_id:chan.guild.id,songs:[array[0]]})
         else queue.songs.push(array[0])
