@@ -37,7 +37,7 @@ class RPCommand {
         try {
             if (typeof(commandData) !== "object") throw "Command data is not an object"
             if (!name || !commandData || !commandData.description || !commandData.mention || !commandData.noMention || !commandData.victimString || !commandData.perpString) {
-                throw "Command data must incluse at least 'name', 'decription', 'mention', 'noMention', 'victimString', 'perpString'"
+                throw "Command data must incluse at least 'name', 'description', 'mention', 'noMention', 'victimString', 'perpString'"
             }
         } catch (err) {
             console.error(err)
@@ -248,13 +248,15 @@ module.exports.RPCommand = RPCommand
 
 module.exports.initRpCommands = async(bot) => {
     const commands = JSON.parse(fs.readFileSync("json/rp.json","utf8"))
-    console.log(Object.keys(commands).length)
+    let numRPCommands = 0
     // Reads all keys in the rp.json file and sets up the commands listed 
     for(let key in commands) {
         if (commands.hasOwnProperty(key)) {
+            numRPCommands++
             new RPCommand(key, commands[key]).init(bot)
         }
     }
+    console.log("\x1b[32m[VALID]\x1b[33m Starter : "+ numRPCommands + " RP-kommandoer")
 }
 
 /*
