@@ -16,8 +16,6 @@ env = JSON.parse(fs.readFileSync("json/env.json", "utf8"))
 
 let ph = require("./placeholders.js")
 
-let ph = require("./placeholders.js")
-
 let streamOptions = {seek :0, volume : 1}
 
 bot.commands = new Discord.Collection();
@@ -93,36 +91,22 @@ bot.on('ready', async function(){
     setInterval(() => updateModeration(), 60000);
 })
 
-async function query (query, bindings = []) {
-    if(!bot.con.state === "disconnected") {
-        throw new MySqlError("Not connected to a database");
-    }
-
-    return await new Promise((resolve, reject) => {
-        bot.con.query(query, bindings, (error, results) => (error ? reject(error) : resolve(results)));
-    })
-}
-
 class Database {
-    constructor() {
+    constructor(env) {
         this.db = null;
-    }
-
-    initialise() {
-        this.createConnection();
-        this.connect();
-    }
-
-    createConnection() {
-        this.db = mysql.createPool(dbCon.ame);
-    }
-
-    connect() {
-        try {
-            this.db.connect();
-        } catch (err) {
-            console.error(err);
+        if(env === "test") {
+            this.initialise("ame")
+        } else if (env === "prod") {
+            this.initialise("ava")
         }
+    }
+
+    initialise(dbName) {
+        this.createConnection(dbName);
+    }
+
+    async createConnection() {
+        this.db = mysql.createPool(dbCon[dbName]);
     }
 
     getState() {
