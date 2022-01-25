@@ -105,7 +105,7 @@ class Database {
         this.createConnection(dbName);
     }
 
-    async createConnection() {
+    async createConnection(dbName) {
         this.db = mysql.createPool(dbCon[dbName]);
     }
 
@@ -124,8 +124,8 @@ class Database {
     }
 }
 
-bot.db = new Database();
-bot.db.initialise();
+bot.db = new Database(dbCon.env);
+//bot.db.initialise();
 
 /*bot.on("message", async message => {
     try {
