@@ -44,7 +44,7 @@ bot.reaction_menu = []
 
 let dbCon = JSON.parse(fs.readFileSync("json/database.json", "utf8"))
 
-bot.con = mysql.createConnection(dbCon.ame);
+bot.con = mysql.createConnection(dbCon.ava);
 
 bot.con.connect(function(err) {
     if(err) return console.log(err);
@@ -117,10 +117,6 @@ class Database {
 
     initialise(dbName) {
         this.createConnection(dbName);
-
-        let intervalID = setInterval(function(this){
-            return
-        }, 100)
     }
 
     async createConnection(dbName) {

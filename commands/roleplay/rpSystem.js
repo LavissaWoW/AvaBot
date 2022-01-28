@@ -242,6 +242,9 @@ class RPCommand {
         // If no user is mentioned, gifs are fetched from command_nomention version
         let gifName = numMentions > 0 ? this.name : this.name + "_nomention"
 
+        // Temporary information about the reset of stats
+        userMessage.push("\nA new roleplay system has been implemented. All stats have been reset as of 28/01.")
+
         // Generating and sending the message
         message.channel.send(new MessageEmbed()
         .setColor(bot.config.colors.main)
