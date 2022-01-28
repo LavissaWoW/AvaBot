@@ -1,3 +1,6 @@
 node_modules/
 json/database.json
 json/env.json
+.cache/
+.config/
+.npm/
