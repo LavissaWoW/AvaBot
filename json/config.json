@@ -18,6 +18,8 @@
         "136606882088353792"
     ],
     "help_categories": ["roleplay", "level", "giveaway", "music", "moderation", "misc", "administrator", "developer"],
+    "admin_categories": ["administrator"],
+    "dev_categories": ["developer"],
     "max_autoresponses_free": 20,
     "max_autoresponses_premium": 50,
     "colors":{
