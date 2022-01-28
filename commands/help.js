@@ -28,11 +28,33 @@ class Help {
             fields: []
         }
 
-        for (const key of this.categories) {
-            if(await this.argIsCategory(args) && key !== args) {
-                continue
+        if (this.categories.includes(args) || ! args){
+            for (const key of this.categories) {
+                if(await this.argIsCategory(args) && key !== args) {
+                    continue
+                }
+                helpEmbed.fields.push(this.generateEmbedFieldForCategory(key, this.category_headlines[key]))
             }
-            helpEmbed.fields.push(this.generateEmbedFieldForCategory(key, this.category_headlines[key]))
+        } else {
+            let command = bot.commands.find(e => (e.help.name.toLowerCase() === args.toLowerCase() || e.help.alias.includes(args.toLowerCase())))
+            if (!command) {
+                helpEmbed.fields.push({name: "Command not found", value: `The command ${args} does not exist`})
+            } else {
+                helpEmbed.description = `Command: \`${command.help.name}\``+
+                `\nAlias: ${command.help.alias.length === 0 ? "..." : command.help.alias.map(e => "`" + e + "`").join(", ")}`+
+                `\nDescription: ${command.help.description}`
+
+                helpEmbed.fields.push({
+                    name: "Bot permission",
+                    value: "`" + (command.help.permissions.user === "" ? "..." : command.help.permissions.user) + "`",
+                    inline:true
+                },
+                {
+                    name:"User permission",
+                    value:"`" + (command.help.permissions.bot === "" ? "..." : command.help.permissions.bot) + "`",
+                    inline:true
+                })
+            }
         }
 
         helpEmbed.fields.push({
