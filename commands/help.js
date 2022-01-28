@@ -30,7 +30,11 @@ class Help {
 
         if (this.categories.includes(args) || ! args){
             for (const key of this.categories) {
-                if(await this.argIsCategory(args) && key !== args) {
+                if(
+                    (bot.config.admin_categories.includes(key) && !message.member.hasPermission("ADMINISTRATOR")) ||
+                    (bot.config.dev_categories.includes(key) && !bot.config.gifadd.includes(message.author.id)) ||
+                    (await this.argIsCategory(args) && key !== args)
+                ){
                     continue
                 }
                 helpEmbed.fields.push(this.generateEmbedFieldForCategory(key, this.category_headlines[key]))

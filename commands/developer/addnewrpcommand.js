@@ -1,6 +1,7 @@
-rpc = require ("./rpsystem.js")
+rpc = require ("../roleplay/rpsystem.js")
 
 module.exports.run = async(bot, message, args) => {
+    if(!bot.config.gifadd.includes(message.author.id)) return
     // Arg must be a JSON formatted string
     if (args[0] === "{") {
         try {
