@@ -52,21 +52,37 @@ bot.con.connect(function(err) {
 });
 
 fs.readdir("./commands/", (err, folders) => {
+    // Parsing all folders in command dir
     folders.forEach(folder => {
+        // Reading all file names in "folder"
         fs.readdir("./commands/" + folder, (err, files) => {
+            // Err signifies that "folder" is not a directory, but a file. So it is parsed
             if(err){
+                // Ensures we're reading a JS file
                 if(folder.endsWith(".js")){
                     let properties = require("./commands/" + folder)
                     console.log("\x1b[32m[VALID]\x1b[33m Starter : " + folder)
+
+                    // Command is converted to a Class based system, and is initiated differently
+                    if(properties.init) {
+                            return properties.init(bot, "")
+                    }
+                    // Command is initiated using the old system
                     properties.help.category = ""
                     return bot.commands.set(properties.help.name,properties)
-                } else return console.log(folder + " is not a directory or a command !")
+                } else {
+                    return console.log(folder + " is not a directory or a command !")
+                }
             }
             let jsfile = files.filter(f => f.split(".").pop() === "js")
             if(jsfile.length <= 0) return console.log("No command found!");
             jsfile.forEach((f, i) => {
                 let props = require(`./commands/` + folder + "/" + f);
                 console.log("\x1b[32m[VALID]\x1b[33m Starter : " + f + " (" + folder + ")");
+                // Command is converted to a Class based system, and is initiated differently
+                if(props.init) {
+                    return props.init(bot, folder)
+                }
                 props.help.category = folder
                 bot.commands.set(props.help.name, props);
             });
@@ -77,8 +93,6 @@ bot.login(env.token)
 
 let count = 0
 bot.on('ready', async function(){
-    let rpCommands = require("./commands/roleplay/rpSystem.js")
-    await rpCommands.initRpCommands(bot)
     console.log("\x1b[32m[START]\x1b[33m Ava is connected !\x1b[0m")
     console.log(`${bot.user.username} is on ${bot.guilds.cache.size} servers and monitoring ${bot.users.cache.size} users! ${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases`)
     setInterval(() => {
@@ -103,6 +117,10 @@ class Database {
 
     initialise(dbName) {
         this.createConnection(dbName);
+
+        let intervalID = setInterval(function(this){
+            return
+        }, 100)
     }
 
     async createConnection(dbName) {
@@ -125,7 +143,6 @@ class Database {
 }
 
 bot.db = new Database(dbCon.env);
-//bot.db.initialise();
 
 /*bot.on("message", async message => {
     try {

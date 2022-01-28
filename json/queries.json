@@ -217,7 +217,7 @@
     "update_shrug_v": "UPDATE profil SET shrug_v=shrug_v+1 WHERE user_id=?",
     "update_shy_p": "UPDATE profil SET shy_p=shy_p+1 WHERE user_id=?",
     "update_shy_v": "UPDATE profil SET shy_v=shy_v+1 WHERE user_id=?",
-    "update_simp_p": "UPDATE profil SET simp_p=simp_p WHERE user_id=?",
+    "update_simp_p": "UPDATE profil SET simp_p=simp_p+1 WHERE user_id=?",
     "update_simp_v": "UPDATE profil SET simp_v=simp_v+1 WHERE user_id=?",
     "update_simping_p": "UPDATE profil SET simping_p=simping_p+1 WHERE user_id=?",
     "update_simping_v": "UPDATE profil SET simping_v=simping_v+1 WHERE user_id=?",
