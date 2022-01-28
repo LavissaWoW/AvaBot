@@ -37,7 +37,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"setwelcomemessage",
-    alias: [],
+    alias: ["swm"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,

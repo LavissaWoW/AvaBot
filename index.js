@@ -96,9 +96,9 @@ bot.on('ready', async function(){
     console.log("\x1b[32m[START]\x1b[33m Ava is connected !\x1b[0m")
     console.log(`${bot.user.username} is on ${bot.guilds.cache.size} servers and monitoring ${bot.users.cache.size} users! ${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases`)
     setInterval(() => {
-        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "COMPETING"}), count++
-        else if(count === 1) bot.user.setActivity(`with ${bot.guilds.cache.size} servers and ${bot.users.cache.size} users!`, {type: "PLAYING"}), count++
-        else if(count === 2) bot.user.setActivity(`${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases!`, {type: "LISTENING"}), count = 0
+        if(count === 0) bot.user.setActivity(`ava help | For command list! | Vote for Ava to help her grow!`, {type: "PLAYING"}), count++
+        else if(count === 1) bot.user.setActivity(`${bot.guilds.cache.size} servers and ${bot.users.cache.size} users!`, {type: "WATCHING"}), count++
+        else if(count === 2) bot.user.setActivity(`with ${bot.commands.size} commands and ${bot.commands.map(e => e.help.alias.length).reduce((x,y) => x + y)} aliases!`, {type: "WATCHING"}), count = 0
     },10000)
 
     setInterval(() => updateGiveaway(),30000)
@@ -231,6 +231,7 @@ bot.db = new Database(dbCon.env);
 
 
 bot.on("message", async message => {
+    try {
     if(message.author.bot || !message.guild) return
 
     bot.con.query(bot.queries.get_guild_config,[message.guild.id],function(err,guild_config){
@@ -362,8 +363,8 @@ bot.on("message", async message => {
                     let prefix_used = bot.prefix.filter(e => message.content.toLowerCase().startsWith(e))
                     if(prefix_used.length === 0) return
                     prefix_used = prefix_used[0]
-                    let args = message.content.slice(prefix_used.length).trim().split(" ").slice(1).join(" ")
-                    let cmd = message.content.slice(prefix_used.length).trim().split(" ")[0]                    
+                    let args = message.content.slice(prefix_used.length).split(" ").slice(1).join(" ")
+                    let cmd = message.content.slice(prefix_used.length).split(" ")[0]
                     
                     let commandFile = bot.commands.find(c => c.help.name.toLowerCase() == cmd.toLowerCase()) || bot.commands.find(c=> c.help.alias ? c.help.alias.includes(cmd.toLowerCase()) : false)      
                     if(!commandFile || !commandFile.help.status) return
@@ -407,6 +408,9 @@ bot.on("message", async message => {
             })
         })
     })
+    } catch {
+
+    } 
 });
 
 
@@ -563,7 +567,6 @@ bot.on("guildMemberAdd", member => {
         .replace(/{servericon}/g,member.guild.iconURL())
         .replace(/{welcomeimage}/g,guild.welcome_image)
         .replace(/{leaveimage}/g,guild.leave_image)
-        console.log(guild.welcome_message)
         if(welcome_channel){
             if(guild.welcome_message.startsWith("{")) welcome_channel.send({embed:JSON.parse(guild.welcome_message)})
             else welcome_channel.send(guild.welcome_message)
@@ -1082,7 +1085,6 @@ async function queued(songs,type,channel,erreur){
     }
     setTimeout(() => {
         let chan = bot.channels.cache.get(channel)
-        console.log(channel, chan)
         let queue = bot.queue.find(e => e.guild_id === chan.guild.id)
         if(!queue) bot.queue.push({guild_id:chan.guild.id,songs:[array[0]]})
         else queue.songs.push(array[0])

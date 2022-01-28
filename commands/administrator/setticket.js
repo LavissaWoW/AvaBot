@@ -18,7 +18,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"setticket",
-    alias: [],
+    alias: ["st"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,

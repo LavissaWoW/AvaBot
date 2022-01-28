@@ -15,7 +15,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"globalleaderboard",
-    alias: ["gleaderboard"],
+    alias: ["gleaderboard", "glb"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:true,

@@ -56,7 +56,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"warn-list",
-    alias: ["warnlist"],
+    alias: ["warnlist", "wl"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,

@@ -33,7 +33,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"setleavemessage",
-    alias: [],
+    alias: ["slm"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,
