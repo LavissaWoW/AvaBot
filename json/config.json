@@ -1,6 +1,6 @@
 {
     "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.Fx9EzcWZd2pqzdxI03FhDgW12Uk",
-    "prefix":"ava ",
+    "prefix":"-",
     "staff":[
         "299560596976697344",
         "315927854523219968",
@@ -17,6 +17,7 @@
         "315927854523219968",
         "136606882088353792"
     ],
+    "help_categories": ["roleplay", "level", "giveaway", "music", "moderation", "misc", "administrator", "developer"],
     "max_autoresponses_free": 20,
     "max_autoresponses_premium": 50,
     "colors":{

@@ -2,6 +2,17 @@
     "ilymes": "testing!",
     "invite": "Invite",
 
+    "help_category_labels": {
+        "roleplay": "👥 Roleplay",
+        "level": "🆙 Level",
+        "giveaway": "🎉 Giveaway",
+        "moderation": "👮 Moderation",
+        "misc": "🎮 Misc",
+        "administrator": "🛠️ Administrator",
+        "developer": "⭐ Developer",
+        "music": "🎵 Music"
+    },
+
     "autoresponse_limit_number": "Number of allowed autoresponses",
     "autoresponse_limit_reached": "Autoresponse limit reached",
     "autoresponse_register_new_error": "I'm sorry, but I wasn't able to register the new responses.",

@@ -325,6 +325,20 @@
         "victimString": "made someone hungry {v_num} times",
         "perpString": "was hungry {p_num} times"
     },
+    "iil": {
+        "description": "Let people know you're in love",
+        "mention": "is in love with {mentions}",
+        "noMention": "is in love",
+        "victimString": "was loved {v_num} times",
+        "perpString": "was in love {p_num} times"
+    },
+    "ily": {
+        "description": "Let people know who you love",
+        "mention": "is in love with {mentions}",
+        "noMention": "proclaims `I'm im love`",
+        "victimString": "was loved {v_num} times",
+        "perpString": "confessed their love {p_num} times"
+    },
     "jump": {
         "description": "Jump someone",
         "mention": "jumps on {mentions}",

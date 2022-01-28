@@ -22,6 +22,7 @@ fs = require("fs")
  * victimString = String for the user receiving the RP action
  * perpString = String for the user performing the RP action
  * 
+ * commandData variables:
  * aliases = The command can have aliases to enable either longer or shorter versions of the command | default: []
  * cooldown = Something something, Amelia please enlighten me | default: 0
  * user_per_cooldown = see the above message | default: 1
@@ -33,6 +34,7 @@ fs = require("fs")
  * ignoreNoMention | Database isn't updated if users aren't mentioned. Used for commands where a noMention means the author requests an action
 */
 class RPCommand {
+    // Initializing the RP command. 
     constructor(name, commandData) {
         try {
             if (typeof(commandData) !== "object") throw "Command data is not an object"
@@ -61,11 +63,12 @@ class RPCommand {
         this.dev = commandData.developer ? commandData.developer : false
         this.status = commandData.status ? commandData.status : true
         this.commandData = commandData
-        this.ignoreNoMention = commandData.ignoreNoMention
+        this.ignoreNoMention = commandData.ignoreNoMention ? commandData.ignoreNoMention : false
 
         this.setHelp()
     }
 
+    // Loads the command into bot memory
     init = async(bot) => {
         if ((bot.queries[`update_${this.name}_p`] && bot.queries[`update_${this.name}_p`]) || this.newlyCreated) {
             bot.commands.set(this.help.name, this)
@@ -74,6 +77,7 @@ class RPCommand {
         }
     }
 
+    // Creates a new command if the command does not exist
     create = async(bot, commandData) => {
         // For use in callbacks
         const name = this.name
@@ -86,11 +90,11 @@ class RPCommand {
         let createCommand = `ALTER TABLE profil ADD ${this.name}_p INT(200) NOT NULL DEFAULT 0, ADD ${this.name}_v INT(200) NOT NULL DEFAULT 0;`
 
         // Creating new columns. Throws error if it fails
-//        try {
-//            await bot.db.query(createCommand)
-//        } catch(err) {
-//            console.error(`The creation of the new RP command ${this.name} failed:`, err)
-//        }
+        try {
+            await bot.db.query(createCommand)
+        } catch(err) {
+            console.error(`The creation of the new RP command ${this.name} failed:`, err)
+        }
 
         // Defining update queries to be written to file
         const pQuery = `UPDATE profil SET ${this.name}_p=${this.name}_p+1 WHERE user_id=?`
@@ -146,6 +150,7 @@ class RPCommand {
         this.init(bot)
     }
 
+    // Sets the help command for the relevant command
     async setHelp() {
         let help = {
         name: this.name,
@@ -156,12 +161,12 @@ class RPCommand {
         description: this.desc,
         permissions: this.permissions,
         developer: this.dev,
-        status: this.status,
-        category: "roleplay"
+        status: this.status
         }
         this.help = help
     }
 
+    // Runs the RP command when a user writes it
     async run(bot, message, args) {
         let userMessage = [], printString = [], usr = []
         let numMentions = 0, stop = false
@@ -198,7 +203,7 @@ class RPCommand {
         // Creates a printable "a, b, c and d" string for embed "author" field
         printString = [printString.slice(0, -1).join(', '), printString.slice(-1)[0]].join(printString.length < 2 ? '' : ' and ')
 
-        let authorMessage = [message.author.username, this.victimString, "and", this.perpString].join(" ")
+        let authorMessage = [message.author.username, this.perpString, "and", this.victimString].join(" ")
         userMessage.push(authorMessage, "-------")
 
         for (let index = 0; index < usr.length; index++) {
@@ -206,7 +211,10 @@ class RPCommand {
             // Fetch victim profile
             let user = await bot.db.query(bot.queries.get_profil,[usr[index].id])
             if(!user || user.length === 0){
+                // Returning statement only contains user_id, so we create the required fields
                 user = await bot.db.query(bot.queries.create_profil,[usr[index].id])
+                user[0][`${this.name}_p`] = 0
+                user[0][`${this.name}_v`] = 0
             } 
             user = user[0] // All SQL responses are arrays of RowDataPacket types, so we get the first entry
 
@@ -244,41 +252,17 @@ class RPCommand {
     }
 }
 
-module.exports.RPCommand = RPCommand
-
-module.exports.initRpCommands = async(bot) => {
+module.exports.init = async(bot, category) => {
     const commands = JSON.parse(fs.readFileSync("json/rp.json","utf8"))
     let numRPCommands = 0
     // Reads all keys in the rp.json file and sets up the commands listed 
     for(let key in commands) {
         if (commands.hasOwnProperty(key)) {
             numRPCommands++
-            new RPCommand(key, commands[key]).init(bot)
+            const cmd = new RPCommand(key, commands[key])
+            cmd.init(bot)
+            cmd.help.category = category
         }
-    }
+   }
     console.log("\x1b[32m[VALID]\x1b[33m Starter : "+ numRPCommands + " RP-kommandoer")
-}
-
-/*
- * The below code responds to the "rp" command, informing users that the RP system exists  
-*/
-
-module.exports.help = {
-    name:"rp",
-    alias: [],
-    cooldown:0,
-    use_per_cooldown:1,
-    deleted:false,
-    description:"Use the command help to learn about all RP commands",
-    permissions:{
-        bot:"",
-        user:"",
-        role:""
-    },
-    developer:false,
-    status:true
-}
-
-module.exports.run = async(bot, message, args) => {
-    message.channel.send("I have many RP commands available. Type 'ava help' to get an overview of the commands I respond to")
 }
