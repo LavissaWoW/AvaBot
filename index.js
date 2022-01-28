@@ -359,8 +359,8 @@ bot.on("message", async message => {
                     let prefix_used = bot.prefix.filter(e => message.content.toLowerCase().startsWith(e))
                     if(prefix_used.length === 0) return
                     prefix_used = prefix_used[0]
-                    let args = message.content.slice(prefix_used.length).split(" ").slice(1).join(" ")
-                    let cmd = message.content.slice(prefix_used.length).split(" ")[0]
+                    let args = message.content.slice(prefix_used.length).trim().split(" ").slice(1).join(" ")
+                    let cmd = message.content.slice(prefix_used.length).trim().split(" ")[0]
                     
                     let commandFile = bot.commands.find(c => c.help.name.toLowerCase() == cmd.toLowerCase()) || bot.commands.find(c=> c.help.alias ? c.help.alias.includes(cmd.toLowerCase()) : false)      
                     if(!commandFile || !commandFile.help.status) return
