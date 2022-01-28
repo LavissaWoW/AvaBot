@@ -6,7 +6,7 @@ module.exports.run = async(bot, message, args) => {
     infos = infos.replace("  "," ").split(" ")
     let mention = message.mentions.channels.first()
     if(mention && mention.type !== "text") mention = undefined
-    
+
     let duration = (mention ? infos[1] : infos[0])
     if(!duration) return bot.erreur("You must respect this model !\n\n• `ava start (channel) <duration> <winners> <gift>`",message.channel.id)
     duration = duration.replace("j","d")
@@ -23,7 +23,7 @@ module.exports.run = async(bot, message, args) => {
     if(gift.length > 30) return bot.erreur("The gift cannot exceed 30 characters !",message.channel.id)
 
     if(!mention) mention = message.channel
-    
+
     message.react("✅")
     let msg = await mention.send({embed:{
         color:bot.config.colors.main,
@@ -44,8 +44,8 @@ module.exports.run = async(bot, message, args) => {
 
 
 module.exports.help = {
-    name:"start",
-    alias: [],
+    name:"giveawaystart",
+    alias: ["giveaway-start", "gw", "gws", "giveaway"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,

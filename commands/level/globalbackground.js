@@ -34,7 +34,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"globalbackground",
-    alias: ["gb"],
+    alias: ["gbg", "gb"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:true,

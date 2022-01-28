@@ -37,7 +37,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"globalrank",
-    alias: ["gr"],
+    alias: ["gr", "grank"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,

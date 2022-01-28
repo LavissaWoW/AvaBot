@@ -21,7 +21,7 @@ module.exports.run = async(bot, message, args) => {
 
 module.exports.help = {
     name:"levelreset",
-    alias: ["lreset"],
+    alias: ["lreset", "lr"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,
