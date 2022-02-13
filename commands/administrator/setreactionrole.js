@@ -156,8 +156,8 @@ module.exports.run = async(bot, message, args) => {
 
 
 module.exports.help = {
-    name:"setreactionrole",
-    alias: ["srr"],
+    name:"reactionrole",
+    alias: ["rr"],
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,
