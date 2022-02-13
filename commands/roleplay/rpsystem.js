@@ -18,8 +18,8 @@ fs = require("fs")
  * All RP commands have feedback strings. These have parts that are customized to the relevant command.
  * Message is built up like this:
  * victimName, victimString, "and", perpString
- * For example: UserA, "got hugged {5} times" "and", "hugged others {1} times" 
- * victimString = String for the user receiving the RP action
+ * For example: UserA, "got hugged {5} times", "and", "hugged others {1} times" 
+ * victimString = String for the user targetted by the RP action
  * perpString = String for the user performing the RP action
  * 
  * commandData variables:

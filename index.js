@@ -1,5 +1,6 @@
 const { notDeepEqual } = require("assert");
 const levellingSystem = require("./levelling-system.js");
+const Database = require("./db.js")
 
 const Discord = require("discord.js"),
 bot = new Discord.Client(/*{ws: { intents: Discord.Intents.ALL }}*/),
@@ -44,7 +45,8 @@ bot.reaction_menu = []
 
 let dbCon = JSON.parse(fs.readFileSync("json/database.json", "utf8"))
 
-bot.con = mysql.createConnection(dbCon.ava);
+bot.db = new Database(dbCon);
+bot.con = mysql.createConnection(dbCon.ame);
 
 bot.con.connect(function(err) {
     if(err) return console.log(err);
@@ -104,41 +106,6 @@ bot.on('ready', async function(){
     setInterval(() => updateGiveaway(),30000)
     setInterval(() => updateModeration(), 60000);
 })
-
-class Database {
-    constructor(env) {
-        this.db = null;
-        if(env === "test") {
-            this.initialise("ame")
-        } else if (env === "prod") {
-            this.initialise("ava")
-        }
-    }
-
-    initialise(dbName) {
-        this.createConnection(dbName);
-    }
-
-    async createConnection(dbName) {
-        this.db = mysql.createPool(dbCon[dbName]);
-    }
-
-    getState() {
-        return this.db.state;
-    }
-
-    async query(sqlQuery, bindings = []) {
-        if (this.db.state === "disconnected") {
-            throw new MySqlError("Not connected to a database");
-        }
-
-        return await new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, bindings, (error, results) => (error ? reject(error) : resolve(results)));
-        })
-    }
-}
-
-bot.db = new Database(dbCon.env);
 
 /*bot.on("message", async message => {
     try {
