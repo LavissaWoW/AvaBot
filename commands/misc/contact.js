@@ -7,7 +7,7 @@ module.exports.run = async(bot, message, args, langue) => {
         .setColor(bot.config.colors.main)
         .setAuthor("")
         .setDescription("")
-        embed.addField("Join our support server if you have questions or concerns", "[Support server!](https://discord.gg/vJSjPEEeGU)")
+        embed.addField("Join our support server if you to cantact devs", "[Support server!](https://discord.gg/vJSjPEEeGU)")
 
         message.channel.send(embed)
     }
@@ -21,7 +21,7 @@ module.exports.help = {
     cooldown:0,
     use_per_cooldown:1,
     deleted:false,
-    description:"Supports server!",
+    description:"Contact",
     permissions:{
         bot:"",
         user:"",
