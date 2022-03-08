@@ -1,6 +1,7 @@
 const { notDeepEqual } = require("assert");
 const levellingSystem = require("./levelling-system.js");
 const Database = require("./db.js")
+const moment = require('moment');
 
 const Discord = require("discord.js"),
 bot = new Discord.Client(/*{ws: { intents: Discord.Intents.ALL }}*/),
@@ -560,7 +561,7 @@ bot.on("guildMemberAdd", member => {
                 },
                 {
                     name:"Date",
-                    value:"`" + date.format(member.user.createdAt,"DD/MM/YYYY - HH:mm") + "`",
+                    value:"`" + moment.utc(member.user.createdAt).format("DD/MM/YYYY - HH:mm") + "`",
                     inline:true
                 }
             ],
