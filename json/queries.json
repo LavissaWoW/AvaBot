@@ -249,7 +249,7 @@
     "update_tickle_v": "UPDATE profil SET tickle_v=tickle_v+1 WHERE user_id=?",
     "update_tired_p": "UPDATE profil SET tired_p=tired_p+1 WHERE user_id=?",
     "update_tired_v": "UPDATE profil SET tired_v=tired_v+1 WHERE user_id=?",
-    "update_unique": "UPDATE role_reaction SET uniq=? WHERE linked_key=?",
+	"update_unique": "UPDATE role_reaction SET uniq=? WHERE linked_key=?",
     "update_vibe_p": "UPDATE profil SET vibe_p=vibe_p+1 WHERE user_id=?",
     "update_vibe_v": "UPDATE profil SET vibe_v=vibe_v+1 WHERE user_id=?",
     "update_wag_p": "UPDATE profil SET wag_p=wag_p+1 WHERE user_id=?",
