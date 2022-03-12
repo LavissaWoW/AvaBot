@@ -251,7 +251,7 @@ bot.on("message", async message => {
                     //###################GUILD XP#####################\\
                     //################################################\\
 
-                    if(message.content.length >= 10 && !guild_config.level_blacklist_channels.split(",").includes(message.channel.id)){
+                    if(message.content.length >= 10 && ((guild_config.level_blacklist_channels && !guild_config.level_blacklist_channels.split(",").includes(message.channel.id)) || !guild_config.level_blacklist_channels)){
                         let xp_win = guild_config.level_xp_gain
                         profil_guild.xp += xp_win
 						bot.con.query(bot.queries.update_level,[profil_guild.level,profil_guild.xp,message.author.id,message.guild.id])
