@@ -37,8 +37,9 @@ module.exports.run = async(bot, message, args) => {
         } else lookupArg = args[0]
 
         var arrayOfObjects = JSON.parse(data)
-        if (arrayOfObjects[lookupArg] == null) {
+        if (!arrayOfObjects[lookupArg]) {
             arrayOfObjects[lookupArg] = []
+            bot.acts[lookupArg] = []
         }
         arrayOfObjects[lookupArg].push(args[1])
         fs.writeFile(path.resolve(__dirname,'../../json/actions.json'), JSON.stringify(arrayOfObjects, null, 4), 'utf-8', function(err) {
