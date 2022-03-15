@@ -29,9 +29,10 @@ module.exports.run = async(bot, message, args) => {
         message.channel.send("I'm sorry, you didn't write the command correctly.\nSyntax: addgif _rpCommand_ _URL_ [_nomention_]")
         return
     }
+
     fs.readFile(path.resolve(__dirname, '../../json/actions.json'), 'utf-8', function(err, data) {
         if (err) throw err
-            
+
         if (args[2] === "nomention") {
             lookupArg = `${args[0]}_${args[2]}`
         } else lookupArg = args[0]
@@ -42,7 +43,7 @@ module.exports.run = async(bot, message, args) => {
             bot.acts[lookupArg] = []
         }
         arrayOfObjects[lookupArg].push(args[1])
-        fs.writeFile(path.resolve(__dirname,'../../json/actions.json'), JSON.stringify(arrayOfObjects, null, 4), 'utf-8', function(err) {
+        fs.writeFile(path.resolve(__dirname ,'../../json/actions.json'), JSON.stringify(arrayOfObjects, null, 4), 'utf-8', function(err) {
             if (err) throw err
             bot.acts[lookupArg].push(args[1])
             console.log(bot.acts[lookupArg])
