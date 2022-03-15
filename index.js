@@ -251,7 +251,7 @@ bot.on("message", async message => {
                     //###################GUILD XP#####################\\
                     //################################################\\
 
-                    if(message.content.length >= 10 && !guild_config.level_blacklist_channels.split(",").includes(message.channel.id)){
+                    if(message.content.length >= 10 && (guild_config.level_blacklist_channels && !guild_config.level_blacklist_channels.split(",").includes(message.channel.id))){
                         let xp_win = guild_config.level_xp_gain
                         profil_guild.xp += xp_win
 						bot.con.query(bot.queries.update_level,[profil_guild.level,profil_guild.xp,message.author.id,message.guild.id])
@@ -521,19 +521,22 @@ bot.on("guildMemberAdd", member => {
     bot.con.query(bot.queries.get_guild_config,[member.guild.id],function(err,guild){
         if(!guild || guild.length === 0) return
         guild = guild[0]
-        let welcome_channel = bot.channels.cache.get(guild.welcome_channel)
-        guild.welcome_message = guild.welcome_message.toString("utf8").replace(/{member}/g,`<@${member.id}>`)
-        .replace(/{member.name}/g,member.user.username)
-        .replace(/{member.id}/g,member.id)
-        .replace(/{member.tag}/g,member.user.tag)
-        .replace(/{membercount}/g,member.guild.memberCount)
-        .replace(/{avatar}/g,member.user.displayAvatarURL({format:"png"}))
-        .replace(/{servericon}/g,member.guild.iconURL())
-        .replace(/{welcomeimage}/g,guild.welcome_image)
-        .replace(/{leaveimage}/g,guild.leave_image)
-        if(welcome_channel){
-            if(guild.welcome_message.startsWith("{")) welcome_channel.send({embed:JSON.parse(guild.welcome_message)})
-            else welcome_channel.send(guild.welcome_message)
+
+        if(guild.welcome_message) {
+	        let welcome_channel = bot.channels.cache.get(guild.welcome_channel)
+            guild.welcome_message = guild.welcome_message.toString("utf8").replace(/{member}/g,`<@${member.id}>`)
+            .replace(/{member.name}/g,member.user.username)
+            .replace(/{member.id}/g,member.id)
+            .replace(/{member.tag}/g,member.user.tag)
+            .replace(/{membercount}/g,member.guild.memberCount)
+            .replace(/{avatar}/g,member.user.displayAvatarURL({format:"png"}))
+            .replace(/{servericon}/g,member.guild.iconURL())
+            .replace(/{welcomeimage}/g,guild.welcome_image)
+            .replace(/{leaveimage}/g,guild.leave_image)
+            if(welcome_channel){
+                if(guild.welcome_message.startsWith("{")) welcome_channel.send({embed:JSON.parse(guild.welcome_message)})
+                else welcome_channel.send(guild.welcome_message)
+            }
         }
 
         if(guild.log_channel === "") return
