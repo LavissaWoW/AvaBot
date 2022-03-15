@@ -1,15 +1,17 @@
 {
     "token":"ODA1MTAyNzA5NjU2OTExODkz.YBWAVA.Fx9EzcWZd2pqzdxI03FhDgW12Uk",
-    "prefix":"-",
+    "prefix":"ava",
     "staff":[
         "315927854523219968",
         "136606882088353792",
-        "406841142735536139"
+        "406841142735536139",
+        "450381834388242432"
     ],
     "gifadd":[
         "315927854523219968",
         "136606882088353792",
-        "406841142735536139"
+        "406841142735536139",
+        "450381834388242432"
     ],
     "help_categories": ["roleplay", "level", "giveaway", "music", "moderation", "misc", "administrator", "developer"],
     "admin_categories": ["administrator"],

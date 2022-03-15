@@ -104,5 +104,6 @@ dist
 .tern-port
 
 .config/
+.npm/
 json/database.json
 json/env.json
