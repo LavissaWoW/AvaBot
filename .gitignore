@@ -4,3 +4,4 @@ json/env.json
 .cache/
 .config/
 .npm/
+package-lock.json
